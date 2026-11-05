@@ -1,43 +1,51 @@
-# Företagsnätverk – Linux- och nätverkslabb
+# Företagsnätverk – egen nätverkslabb
 
-Ett övningsprojekt för dator- och kommunikationsteknik med Linux, Docker och nätverksfelsökning.
+Det här projektet byggs **från grunden** för att öva på Linux, Docker, IP-adressering, routing och felsökning. Det återanvänder inte filer från en tidigare övning.
 
-> **Projektstatus:** GitHub-repot innehöll ursprungligen bara denna README. Den tidigare Codespaces-labben behöver kontrolleras och dess filer läggas till innan vi påstår att en Docker-miljö kan startas från repot.
+> **Första utkastet:** Topologin nedan är ett förslag, inte bekräftade lärarkrav. Konfigurationen har ännu inte körtestats i Codespaces.
 
-## Tidigare labb (att verifiera)
+## Topologi (förslag)
 
-I den tidigare övningen användes följande containernamn:
+```text
+ office 172.30.10.0/24              servers 172.30.20.0/24
+ pc1 (.10) ─┐
+ pc2 (.11) ─┼─ router (.10.1 / .20.1) ─┬─ pc3 (.10)
+            │                         └─ server (.20)
+```
 
-- `router`
-- `pc1`
-- `pc2`
-- `pc3`
-- `server`
+Routercontainern är ansluten till båda näten och vidarebefordrar IPv4-paket. PC-klienterna och servern har statiska rutter till det andra subnätet via routercontainern. Docker-nätens gatewayadresser slutar på `.254`; dessa är inte vår labbrouter.
 
-För `pc1` användes adressen `172.30.10.10/24`. Ping-test fungerade under en tidigare session. Övriga IP-adresser, nätverk och konfigurationsfiler måste verifieras mot Codespaces-miljön.
+## Starta i Codespaces
 
-## Kom igång
+Se till att Docker är tillgängligt. Från repots rot:
 
-1. Öppna repot i GitHub Codespaces.
-2. Kontrollera om dina tidigare labbfiler finns i arbetsytan eller i ett annat repo.
-3. Kör `git status` och `ls -la` för att se vad som finns lokalt.
-4. Om en Compose-fil finns, granska den innan du startar containrar.
-5. Följ [labbjournalen](docs/labbjournal.md) för att dokumentera verkliga resultat.
+```bash
+docker compose config
+docker compose up -d --build
+docker compose ps
+```
 
-**Obs:** Det finns ännu ingen verifierad Compose-konfiguration i detta repo. Kommandot `docker compose up` ska därför inte förväntas fungera här förrän den har lagts till.
+Prova sedan:
 
-## Mål
+```bash
+docker compose exec pc1 ip -br addr
+docker compose exec pc1 ip route
+docker compose exec pc1 ping -c 4 172.30.10.11
+docker compose exec pc1 ping -c 4 172.30.20.20
+```
 
-- Förstå adressering, nätmask, standard-gateway och routing.
-- Använda Linux-kommandon för att inspektera nätverk.
-- Testa och felsöka anslutning mellan värdar.
-- Dokumentera inställningar, tester och slutsatser på ett reproducerbart sätt.
+Det första ping-testet går inom samma subnät; det andra kräver routing. Om ett test misslyckas, dokumentera resultatet och felsök — det är en del av uppgiften.
 
-## Säkerhet
+Stoppa miljön med `docker compose down`.
 
-Använd bara tillåtna labbnät och testmiljöer. Lägg inte in lösenord, API-nycklar eller andra hemligheter i Git.
+## Filer
 
-## Projektmaterial
+- `compose.yaml` – fem containrar och två isolerade labbnät.
+- `Dockerfile` – Alpine Linux med `ip` och `ping`.
+- `docs/labbjournal.md` – checklistor och testresultat.
 
-- [Labbjournal och kontrollpunkter](docs/labbjournal.md)
-- [Git-ignore](.gitignore)
+## Nästa steg
+
+Verifiera uppgiftens verkliga krav (antal enheter, IP-plan, tjänster, routing och eventuella säkerhetsregler). Justera därefter förslaget och kör testerna i Codespaces.
+
+**Säkerhet:** Spara aldrig lösenord, tokens eller andra hemligheter i Git.
