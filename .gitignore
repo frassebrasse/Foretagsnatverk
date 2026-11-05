@@ -1,0 +1,19 @@
+# Local environment
+.env
+.env.*
+!.env.example
+
+# Editor and OS files
+.DS_Store
+.vscode/
+.idea/
+
+# Python caches (if scripts are added later)
+__pycache__/
+*.py[cod]
+.venv/
+
+# Logs and temporary output
+*.log
+tmp/
+temp/
