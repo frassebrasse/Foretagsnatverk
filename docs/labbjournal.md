@@ -1,57 +1,50 @@
 # Labbjournal – företagsnätverk
 
-## Bekräftat från tidigare övning
+## Syfte
 
-| Enhet | IP-adress | Status |
-| --- | --- | --- |
-| router | Ej verifierad | Förekom i labbmiljön |
-| pc1 | 172.30.10.10/24 | Ping-test rapporterades fungera |
-| pc2 | Ej verifierad | Förekom i labbmiljön |
-| pc3 | Ej verifierad | Förekom i labbmiljön |
-| server | Ej verifierad | Förekom i labbmiljön |
+Skapa en ny nätverksmiljö från grunden. Den här första topologin är ett **förslag** tills uppgiftsbeskrivningen har kontrollerats.
 
-**Viktigt:** Tabellen är historiska anteckningar, inte ett aktuellt testresultat från GitHub.
+## Föreslagen adressplan
 
-## Första inventering i Codespaces
+| Enhet | Nät | Adress | Route till annat nät |
+| --- | --- | --- | --- |
+| router | office + servers | 172.30.10.1/24 + 172.30.20.1/24 | Direktansluten |
+| pc1 | office | 172.30.10.10/24 | via 172.30.10.1 |
+| pc2 | office | 172.30.10.11/24 | via 172.30.10.1 |
+| pc3 | servers | 172.30.20.10/24 | via 172.30.20.1 |
+| server | servers | 172.30.20.20/24 | via 172.30.20.1 |
 
-Kör dessa ofarliga läskommandon i arbetsytans terminal:
+## Kontrollpunkter
 
-```bash
-pwd
-git status
-git remote -v
-ls -la
-find . -maxdepth 3 -type f -not -path './.git/*' | sort
-docker ps -a
-```
+- [ ] Kontrollera lärarens krav och anpassa topologin.
+- [ ] Kör `docker compose config` utan fel.
+- [ ] Bygg och starta containrarna.
+- [ ] Kontrollera IP-adresser med `ip -br addr`.
+- [ ] Kontrollera statiska rutter med `ip route`.
+- [ ] Ping mellan pc1 och pc2 (samma nät).
+- [ ] Ping från pc1 till servern (mellan näten).
+- [ ] Ping från servern till pc1 (returväg).
+- [ ] Dokumentera eventuella fel och lösningar.
 
-Kontrollera att du är i rätt repo och att inga lokala ändringar skrivs över. Om labbfilerna finns här, dokumentera var Dockerfile, Compose-filen och eventuella skript ligger.
-
-## Nätverkstester (när containrarna är igång)
-
-Kontrollera först filnamn och faktiska containernamn innan du kör kommandon:
+## Testkommandon
 
 ```bash
-docker ps
-docker exec pc1 ip -br address
-docker exec pc1 ip route
-docker exec pc1 ping -c 4 172.30.10.10
+docker compose exec router ip -br addr
+docker compose exec router sysctl net.ipv4.ip_forward
+docker compose exec pc1 ip route
+docker compose exec pc1 ping -c 4 172.30.10.11
+docker compose exec pc1 ping -c 4 172.30.20.20
+docker compose exec server ping -c 4 172.30.10.10
 ```
 
-Det sista kommandot testar bara `pc1`s egen tidigare IP-adress, **inte** kontakt med servern eller routing. För ett verkligt anslutningstest: ersätt måladressen med en verifierad IP till en annan container.
+## Testresultat (ej utförda)
 
-## Att fylla i
+| Datum | Från | Till | Förväntat | Faktiskt resultat |
+| --- | --- | --- | --- | --- |
+| – | pc1 | pc2 | Ping svarar | Ej testat |
+| – | pc1 | server | Ping via router | Ej testat |
+| – | server | pc1 | Ping via router | Ej testat |
 
-- [ ] Hitta ursprungliga labbfiler.
-- [ ] Dokumentera alla IP-adresser och nätmasker.
-- [ ] Kontrollera standard-gateway på varje klient.
-- [ ] Testa klient till klient.
-- [ ] Testa klient till server.
-- [ ] Kontrollera om kommunikation mellan subnät faktiskt passerar routercontainern.
-- [ ] Skriv ned felsökningsresultat och slutsats.
+## Slutsats
 
-## Resultatmall
-
-| Datum | Källa | Mål | Kommando | Resultat | Kommentar |
-| --- | --- | --- | --- | --- | --- |
-| Ej testat | pc1 | annan enhet | ping | Ej testat | Fylls i efter verifiering |
+Fylls i efter praktisk verifiering i Codespaces.
